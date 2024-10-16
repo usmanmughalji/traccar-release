@@ -23,7 +23,7 @@ public class CustomDeviceResource {
     }
 
     @DELETE
-    @Path("devices/{deviceId}/disconnect/{userId}")
+    @Path("devices/{deviceId}/disconnect")
     public Response disconnectDevice(@PathParam("deviceId") long deviceId) {
         // Step 1: Check if the device session exists
         DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
