@@ -1,23 +1,25 @@
-package org.traccar.api;
+package org.traccar.api.resource;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Device;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
 
-@Path("custom")
-public class CustomDeviceResource {
+@Path("custom") // Updated path
+public class CustomDeviceResource extends ExtendedObjectResource<Device> { // Extend ExtendedObjectResource with Device
 
     private final ConnectionManager connectionManager;
     private final CacheManager cacheManager;
 
     @Inject
     public CustomDeviceResource(ConnectionManager connectionManager, CacheManager cacheManager) {
+        super(Device.class); // Call the constructor of ExtendedObjectResource with Device.class
         this.connectionManager = connectionManager;
         this.cacheManager = cacheManager;
     }
