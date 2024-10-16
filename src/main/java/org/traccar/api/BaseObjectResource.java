@@ -125,12 +125,14 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkPermission(baseClass, getUserId(), id);
         permissionsService.checkEdit(getUserId(), baseClass, false, false);
 
+        // Attempt to remove the object from storage
         storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
         cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);
 
         LogAction.remove(getUserId(), baseClass, id);
 
-        return Response.noContent().build();
+        // Return a response indicating successful deletion with a message
+        return Response.ok("Device with ID " + id + " has been successfully deleted.").build();
     }
 
 }
