@@ -95,6 +95,7 @@ import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
+import org.traccar.api.CustomDeviceResource;
 import org.traccar.api.security.LoginService;
 
 import jakarta.annotation.Nullable;
@@ -121,6 +122,7 @@ public class MainModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
+        bind(CustomDeviceResource.class);
     }
 
     @Singleton
