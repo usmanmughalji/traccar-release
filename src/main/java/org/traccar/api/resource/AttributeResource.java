@@ -34,6 +34,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
@@ -95,9 +96,21 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws Exception {
-        permissionsService.checkAdmin(getUserId());
-        return super.remove(id);
+    public Response remove(@PathParam("id") long id) {
+        try {
+            permissionsService.checkAdmin(getUserId()); // This can throw StorageException
+            return super.remove(id); // Call to the superclass method
+        } catch (StorageException e) {
+            // Handle the StorageException
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to check admin permissions: " + e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            // Handle any other exceptions
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An unexpected error occurred: " + e.getMessage())
+                    .build();
+        }
     }
 
 }

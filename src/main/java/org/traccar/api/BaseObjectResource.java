@@ -121,18 +121,43 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws Exception {
-        permissionsService.checkPermission(baseClass, getUserId(), id);
-        permissionsService.checkEdit(getUserId(), baseClass, false, false);
+    public Response remove(@PathParam("id") long id) {
+        try {
+            // Check if the user has permission to delete the object
+            permissionsService.checkPermission(baseClass, getUserId(), id);
 
-        // Attempt to remove the object from storage
-        storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
-        cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);
+            // Check if the user has edit permissions for the object
+            permissionsService.checkEdit(getUserId(), baseClass, false, false);
 
-        LogAction.remove(getUserId(), baseClass, id);
+            // Attempt to remove the object from storage
+            storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
 
-        // Return a response indicating successful deletion with a message
-        return Response.ok("Device with ID " + id + " has been successfully deleted.").build();
+            // Invalidate the object in the cache to ensure it's no longer accessible
+            cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);
+
+            // Log the removal action for auditing purposes
+            LogAction.remove(getUserId(), baseClass, id);
+
+            // Return a response indicating successful deletion with a message
+            return Response.status(Response.Status.OK) // 200 OK
+                    .entity("Device with ID " + id + " has been successfully deleted.")
+                    .build();
+        } catch (StorageException e) {
+            // Handle storage-related exceptions
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR) // 500 Internal Server Error
+                    .entity("Failed to delete device with ID " + id + ": " + e.getMessage())
+                    .build();
+        } catch (SecurityException e) {
+            // Handle permission-related exceptions
+            return Response.status(Response.Status.FORBIDDEN) // 403 Forbidden
+                    .entity("You do not have permission to delete device with ID " + id)
+                    .build();
+        } catch (Exception e) {
+            // Handle any other exceptions
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR) // 500 Internal Server Error
+                    .entity("An unexpected error occurred: " + e.getMessage())
+                    .build();
+        }
     }
 
 }
